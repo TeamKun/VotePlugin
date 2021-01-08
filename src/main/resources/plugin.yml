@@ -1,0 +1,18 @@
+name: VotePlugin
+version: ${project.version}
+main: net.teamfruit.voteplugin.VotePlugin
+api-version: 1.15
+authors:
+  - Kamesuta
+commands:
+  vs:
+    permission: voteplugin.vs
+  vget:
+    permission: voteplugin.vs
+  v:
+    permission: voteplugin.v
+permissions:
+  voteplugin.vs:
+    default: op
+  voteplugin.v:
+    default: true
