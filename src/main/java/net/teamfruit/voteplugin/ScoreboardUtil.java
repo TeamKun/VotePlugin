@@ -5,23 +5,25 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 
+@SuppressWarnings("ConstantConditions")
 public class ScoreboardUtil {
     public static String[] cutUnranked(String[] content) {
         String[] elements = Arrays.copyOf(content, 16);
         if (elements[0] == null) {
-            elements[0] = "Unamed board";
+            elements[0] = "Unnamed board";
         }
 
         if (elements[0].length() > 32) {
             elements[0] = elements[0].substring(0, 32);
         }
 
-        for(int i = 1; i < elements.length; ++i) {
+        for (int i = 1; i < elements.length; ++i) {
             if (elements[i] != null && elements[i].length() > 40) {
                 elements[i] = elements[i].substring(0, 40);
             }
@@ -32,45 +34,44 @@ public class ScoreboardUtil {
 
     public static String cutRankedTitle(String title) {
         if (title == null) {
-            return "Unamed board";
+            return "Unnamed board";
         } else {
             return title.length() > 32 ? title.substring(0, 32) : title;
         }
     }
 
     public static HashMap<String, Integer> cutRanked(HashMap<String, Integer> content) {
-        HashMap<String, Integer> elements = new HashMap();
-        elements.putAll(content);
+        HashMap<String, Integer> elements = new HashMap<>(content);
 
         String minimumKey;
         label43:
-        for(; elements.size() > 15; elements.remove(minimumKey)) {
-            minimumKey = (String)elements.keySet().toArray()[0];
+        for (; elements.size() > 15; elements.remove(minimumKey)) {
+            minimumKey = (String) elements.keySet().toArray()[0];
             int minimum = elements.get(minimumKey);
-            Iterator var4 = elements.keySet().iterator();
+            Iterator<String> var4 = elements.keySet().iterator();
 
-            while(true) {
+            while (true) {
                 String string;
                 do {
                     if (!var4.hasNext()) {
                         continue label43;
                     }
 
-                    string = (String)var4.next();
-                } while(elements.get(string) >= minimum && (elements.get(string) != minimum || string.compareTo(minimumKey) >= 0));
+                    string = var4.next();
+                } while (elements.get(string) >= minimum && (elements.get(string) != minimum || string.compareTo(minimumKey) >= 0));
 
                 minimumKey = string;
                 minimum = elements.get(string);
             }
         }
 
-        Iterator var6 = (new ArrayList(elements.keySet())).iterator();
+        Iterator<String> var6 = (new ArrayList<>(elements.keySet())).iterator();
 
-        while(var6.hasNext()) {
-            String string = (String)var6.next();
+        while (var6.hasNext()) {
+            String string = var6.next();
             if (string != null && string.length() > 40) {
                 int value = elements.get(string);
-                elements.remove(string);
+                var6.remove();
                 elements.put(string.substring(0, 40), value);
             }
         }
@@ -82,7 +83,7 @@ public class ScoreboardUtil {
         elements = cutUnranked(elements);
 
         try {
-            if (p.getScoreboard() == null || p.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard() || p.getScoreboard().getObjectives().size() != 1) {
+            if (p.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard() || p.getScoreboard().getObjectives().size() != 1) {
                 p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             }
 
@@ -93,13 +94,11 @@ public class ScoreboardUtil {
 
             p.getScoreboard().getObjective(DisplaySlot.SIDEBAR).setDisplayName(elements[0]);
 
-            for(int i = 1; i < elements.length; ++i) {
+            for (int i = 1; i < elements.length; ++i) {
                 if (elements[i] != null && p.getScoreboard().getObjective(DisplaySlot.SIDEBAR).getScore(elements[i]).getScore() != 16 - i) {
                     p.getScoreboard().getObjective(DisplaySlot.SIDEBAR).getScore(elements[i]).setScore(16 - i);
-                    Iterator var3 = p.getScoreboard().getEntries().iterator();
 
-                    while(var3.hasNext()) {
-                        String string = (String)var3.next();
+                    for (String string : p.getScoreboard().getEntries()) {
                         if (p.getScoreboard().getObjective(p.getUniqueId().toString().substring(0, 16)).getScore(string).getScore() == 16 - i && !string.equals(elements[i])) {
                             p.getScoreboard().resetScores(string);
                         }
@@ -107,16 +106,10 @@ public class ScoreboardUtil {
                 }
             }
 
-            Iterator var10 = p.getScoreboard().getEntries().iterator();
-
-            while(var10.hasNext()) {
-                String entry = (String)var10.next();
+            for (String entry : p.getScoreboard().getEntries()) {
                 boolean toErase = true;
-                String[] var5 = elements;
-                int var6 = elements.length;
 
-                for(int var7 = 0; var7 < var6; ++var7) {
-                    String element = var5[var7];
+                for (String element : elements) {
                     if (element != null && element.equals(entry) && p.getScoreboard().getObjective(p.getUniqueId().toString().substring(0, 16)).getScore(entry).getScore() == 16 - Arrays.asList(elements).indexOf(element)) {
                         toErase = false;
                         break;
@@ -136,7 +129,7 @@ public class ScoreboardUtil {
     }
 
     public static boolean unrankedSidebarDisplay(Collection<Player> players, String[] elements) {
-        Iterator var2 = players.iterator();
+        Iterator<Player> var2 = players.iterator();
 
         Player player;
         do {
@@ -144,8 +137,8 @@ public class ScoreboardUtil {
                 return true;
             }
 
-            player = (Player)var2.next();
-        } while(unrankedSidebarDisplay(player, elements));
+            player = var2.next();
+        } while (unrankedSidebarDisplay(player, elements));
 
         return false;
     }
@@ -158,10 +151,8 @@ public class ScoreboardUtil {
             }
 
             elements = cutUnranked(elements);
-            Iterator var4 = players.iterator();
 
-            while(var4.hasNext()) {
-                Player player = (Player)var4.next();
+            for (Player player : players) {
                 if (player.getScoreboard() != board) {
                     player.setScoreboard(board);
                 }
@@ -174,13 +165,11 @@ public class ScoreboardUtil {
 
             board.getObjective(DisplaySlot.SIDEBAR).setDisplayName(elements[0]);
 
-            for(int i = 1; i < elements.length; ++i) {
+            for (int i = 1; i < elements.length; ++i) {
                 if (elements[i] != null && board.getObjective(DisplaySlot.SIDEBAR).getScore(elements[i]).getScore() != 16 - i) {
                     board.getObjective(DisplaySlot.SIDEBAR).getScore(elements[i]).setScore(16 - i);
-                    Iterator var13 = board.getEntries().iterator();
 
-                    while(var13.hasNext()) {
-                        String string = (String)var13.next();
+                    for (String string : board.getEntries()) {
                         if (board.getObjective(objName).getScore(string).getScore() == 16 - i && !string.equals(elements[i])) {
                             board.resetScores(string);
                         }
@@ -188,16 +177,10 @@ public class ScoreboardUtil {
                 }
             }
 
-            var4 = board.getEntries().iterator();
-
-            while(var4.hasNext()) {
-                String entry = (String)var4.next();
+            for (String entry : board.getEntries()) {
                 boolean toErase = true;
-                String[] var7 = elements;
-                int var8 = elements.length;
 
-                for(int var9 = 0; var9 < var8; ++var9) {
-                    String element = var7[var9];
+                for (String element : elements) {
                     if (element != null && element.equals(entry) && board.getObjective(objName).getScore(entry).getScore() == 16 - Arrays.asList(elements).indexOf(element)) {
                         toErase = false;
                         break;
@@ -220,7 +203,7 @@ public class ScoreboardUtil {
         try {
             title = cutRankedTitle(title);
             elements = cutRanked(elements);
-            if (p.getScoreboard() == null || p.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard() || p.getScoreboard().getObjectives().size() != 1) {
+            if (p.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard() || p.getScoreboard().getObjectives().size() != 1) {
                 p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             }
 
@@ -230,20 +213,20 @@ public class ScoreboardUtil {
             }
 
             p.getScoreboard().getObjective(DisplaySlot.SIDEBAR).setDisplayName(title);
-            Iterator var3 = elements.keySet().iterator();
+            Iterator<String> var3 = elements.keySet().iterator();
 
             String string;
-            while(var3.hasNext()) {
-                string = (String)var3.next();
+            while (var3.hasNext()) {
+                string = var3.next();
                 if (p.getScoreboard().getObjective(DisplaySlot.SIDEBAR).getScore(string).getScore() != elements.get(string)) {
                     p.getScoreboard().getObjective(DisplaySlot.SIDEBAR).getScore(string).setScore(elements.get(string));
                 }
             }
 
-            var3 = (new ArrayList(p.getScoreboard().getEntries())).iterator();
+            var3 = (new ArrayList<>(p.getScoreboard().getEntries())).iterator();
 
-            while(var3.hasNext()) {
-                string = (String)var3.next();
+            while (var3.hasNext()) {
+                string = var3.next();
                 if (!elements.containsKey(string)) {
                     p.getScoreboard().resetScores(string);
                 }
@@ -257,7 +240,7 @@ public class ScoreboardUtil {
     }
 
     public static boolean rankedSidebarDisplay(Collection<Player> players, String title, HashMap<String, Integer> elements) {
-        Iterator var3 = players.iterator();
+        Iterator<Player> var3 = players.iterator();
 
         Player player;
         do {
@@ -265,8 +248,8 @@ public class ScoreboardUtil {
                 return true;
             }
 
-            player = (Player)var3.next();
-        } while(rankedSidebarDisplay(player, title, elements));
+            player = var3.next();
+        } while (rankedSidebarDisplay(player, title, elements));
 
         return false;
     }
@@ -280,10 +263,7 @@ public class ScoreboardUtil {
                 board = Bukkit.getScoreboardManager().getNewScoreboard();
             }
 
-            Iterator var5 = players.iterator();
-
-            while(var5.hasNext()) {
-                Player player = (Player)var5.next();
+            for (Player player : players) {
                 if (player.getScoreboard() != board) {
                     player.setScoreboard(board);
                 }
@@ -295,20 +275,14 @@ public class ScoreboardUtil {
             }
 
             board.getObjective(DisplaySlot.SIDEBAR).setDisplayName(title);
-            var5 = elements.keySet().iterator();
 
-            String string;
-            while(var5.hasNext()) {
-                string = (String)var5.next();
+            for (String string : elements.keySet()) {
                 if (board.getObjective(DisplaySlot.SIDEBAR).getScore(string).getScore() != elements.get(string)) {
                     board.getObjective(DisplaySlot.SIDEBAR).getScore(string).setScore(elements.get(string));
                 }
             }
 
-            var5 = (new ArrayList(board.getEntries())).iterator();
-
-            while(var5.hasNext()) {
-                string = (String)var5.next();
+            for (String string : board.getEntries()) {
                 if (!elements.containsKey(string)) {
                     board.resetScores(string);
                 }
