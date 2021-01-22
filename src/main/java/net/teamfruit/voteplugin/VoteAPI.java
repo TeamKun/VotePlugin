@@ -91,7 +91,7 @@ public class VoteAPI {
         isVoting = false;
         Bukkit.broadcastMessage(ChatColor.GOLD + "投票を終了しました。");
         List<Map.Entry<String, Integer>> list_entries = countMap.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toList());
 
         List<String> leaderboard = IntStream.range(0, 5)
